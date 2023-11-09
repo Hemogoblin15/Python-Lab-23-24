@@ -29,7 +29,11 @@ def ex4():
         if char == char.lower():
             output += char
         else:
-            output += "_" + char.lower()
+            if output == "":
+                output += char.lower()
+            else:
+                output += "_" + char.lower()
+
     print(output)
 
 
@@ -119,4 +123,4 @@ def ex10():
 
     print(len(words))
 
-ex10()
+ex4()
