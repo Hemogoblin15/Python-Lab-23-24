@@ -4,6 +4,13 @@ from selenium.webdriver.common.by import By
 
 
 def write_to_json(query, titles, video_links):
+    """
+    Creates a json file to store the titles and videos of the YouTube uploads about an episode of a series.
+    :param query: The query used to find said uploads.
+    :param titles: The titles of the uploads.
+    :param video_links: The links of the uploads.
+    :return: None
+    """
     data = {"query": query, "videos": []}
 
     for title, link in zip(titles, video_links):
@@ -16,7 +23,13 @@ def write_to_json(query, titles, video_links):
 
 def get_youtube_uploads(query):
     driver = webdriver.Firefox()
-
+    """
+    Crawls YouTube in order to find uploads about a series. Gets the series' name, a season of the series
+    and an episode of that season as parameter.
+    :param query: The query needed to crawl YouTube. It contains the name of the series, a season number 
+    and an episode of that season.
+    :return: The titles and links of the uploads it managed to find.
+    """
     try:
         driver.get(f"https://www.youtube.com/results?search_query={query}&sp=CAI%253D")
         # TODO &sp=CAI%253D cod pentru filter by date

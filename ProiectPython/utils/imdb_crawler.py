@@ -4,17 +4,22 @@ from imdb import IMDb
 from plyer import notification
 
 
-def find_imdb_link(series_title):
+def find_imdb_link(series_name):
+    """
+    Crawls IMDb searching for the IMDb page link of a specified series receiving its name as a parameter.
+    :param series_name: The name of the series it needs to get the link of.
+    :return: The link of the specified series or a string message in case it cannot find it.
+    """
     ia = IMDb()
-    results = ia.search_movie(series_title)
+    results = ia.search_movie(series_name)
     if results:
         for movie in results:
             imdb_link = ia.get_imdbURL(movie)
-            if movie.data['title'].lower().replace(" ", "") == series_title.lower().replace(" ", ""):
+            if movie.data['name'].lower().replace(" ", "") == series_name.lower().replace(" ", ""):
                 return imdb_link
         print("Could not find the series you asked for. Did you mean: ")
         for index, movie in enumerate(results):
-            print(f"{index + 1}. {movie.data['title']}")
+            print(f"{index + 1}. {movie.data['name']}")
 
         print("\nType 0 if none of these apply.")
         choice = input("Choose one of these options: ")
@@ -23,7 +28,7 @@ def find_imdb_link(series_title):
         return "Could not find the series."
 
 notification.notify(
-    title='testing',
+    name='testing',
     message='message',
     app_icon=None,
     timeout=10,

@@ -1,4 +1,2 @@
-1. filter by date
-2. comparatie intre json-uri si noile cautari de fiecare data cand rulezi tool-ul
-3. fac in functie de snooze
-4. update la get all series
+1. comparatie intre json-uri si noile cautari de fiecare data cand rulezi tool-ul
+2. fac in functie de snooze

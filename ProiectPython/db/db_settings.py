@@ -1,5 +1,5 @@
 """
-Dictionary with the parameters for the database connection
+A dictionary holding parameters used for the database connection.
 """
 postgresql = {
     'pguser': 'postgres',

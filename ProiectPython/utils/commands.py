@@ -3,7 +3,13 @@ from db_interaction.interaction import *
 from datetime import datetime, date
 from utils.youtube_crawler import get_youtube_uploads
 
+
 def add_series(repo):
+    """
+    This function calls the insert_series function from interaction.py to add a series to the database
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: None
+    """
     series_name = input("Insert the name of the series you want to add to the list: ")
     if not repo.is_series_in_db(series_name):
         repo.insert_series(Series(series_name))
@@ -13,6 +19,11 @@ def add_series(repo):
 
 
 def remove_series(repo):
+    """
+    This function calls the delete_series function from interaction.py to remove a series from the database
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: None
+    """
     series_name = input("Enter the name of the series you'd wish to delete from the list: ")
     if not repo.is_series_in_db(series_name):
         print("Series not found in the list.")
@@ -21,6 +32,12 @@ def remove_series(repo):
 
 
 def modify_series_rating(repo):
+    """
+    This function calls the update_rating function from interaction.py to update the rating of a series from the database
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: None
+    """
+
     series_name = input("Enter the name of the series you'd like to rate: ")
     if not repo.is_series_in_db(series_name):
         print("Series not found in the list.")
@@ -32,6 +49,12 @@ def modify_series_rating(repo):
 
 
 def snooze_series(repo):
+    """
+    This function calls the snooze_series function from interaction.py to modify the snooze flag to true
+    for a series in the database.
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: None
+    """
     series_name = input("Enter the name of the series you'd like to snooze: ")
     if not repo.is_series_in_db(series_name):
         print("Series not found in the list.")
@@ -40,6 +63,12 @@ def snooze_series(repo):
 
 
 def unsnooze_series(repo):
+    """
+    This function calls the unsnooze_series function from interaction.py to modify the snooze flag to false
+    for a series in the database.
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: None
+    """
     series_name = input("Enter the name of the series you'd like to unsnooze: ")
     if not repo.is_series_in_db(series_name):
         print("Series not found in the list.")
@@ -48,6 +77,12 @@ def unsnooze_series(repo):
 
 
 def update_last_watched_episode(repo):
+    """
+    This function calls the update_last_watched_episode function from interaction.py to modify the last watched episode
+    field  for a series in the database.
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: None
+    """
     series_name = input("Enter the name of the series you last watched: ")
     last_watched_season = input("Enter the number of the season and the episode you last watched. \nSeason: ")
     last_watched_episode = input("Episode: ")
@@ -58,6 +93,12 @@ def update_last_watched_episode(repo):
 
 
 def update_last_time_watched(repo):
+    """
+    This function calls the update_time_watched function from interaction.py to modify the last time the user watched
+    a series in the database.
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: None
+    """
     series_name = input("Enter the name of the series you last watched: ")
 
     if not repo.is_series_in_db(series_name):
@@ -67,6 +108,13 @@ def update_last_time_watched(repo):
 
 
 def youtube_links(repo):
+    """
+    This function provides the titles and links about a specific episode in a series in the database. This function only
+    interacts with the database if the specified series is not found in the database, in which case it prompts the user
+    to add it by calling the insert_series from interaction.py.
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: the titles and links of the YouTube videos about an episode in a series in the database
+    """
     series_name = input("Enter the name of the series you'd like to look up videos about: ")
     if not repo.is_series_in_db(series_name):
         series_add = input("The series is not on your list. Would you like to add it? Type yes or no: ")
@@ -90,6 +138,11 @@ def youtube_links(repo):
 
 
 def get_imdb_link(repo):
+    """
+    This function provides the IMDb link of a series found in the database.
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: the IMDb link of the series.
+    """
     series_name = input("Enter the name of the series you'd like to get the IMDb link to: ")
     if not repo.is_series_in_db(series_name):
         print("Series not found in the list.")
@@ -98,10 +151,23 @@ def get_imdb_link(repo):
 
 
 def list_all_series(repo):
+    """
+    This function calls upon the get_all_series function to return all information about the series present in the
+    database
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: name, link_imdb, rating, last_episode_watched, last_time_watched, snoozed flag for every series in
+    the database
+    """
     return repo.get_all_series()
 
 
 def command_picker(repo):
+    """
+    The so-called menu of the application. Asks the user to pick a command to use. For each command, a
+    function will be called upon to fulfill the required task.
+    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :return: None
+    """
     print("Welcome to your watchlist! What would you like to do next?\n"
           "1. Add series to the list.\n"
           "2. Remove series from the list.\n"
@@ -112,9 +178,10 @@ def command_picker(repo):
           "7. Update your last watch date of a series. \n"
           "8. Watch YouTube videos about a specific episode.\n"
           "9. Link to a series' IMDb page.\n"
-          "10. Exit.\n")
+          "10. List all series in the database\n"
+          "11. Exit.\n")
     command = 0
-    while command != '10':
+    while command != '11':
         command = input("\nPick what you would like to do: ")
 
         if command == '1':
@@ -150,5 +217,8 @@ def command_picker(repo):
         elif command == '9':
             print("Here is the link to this series' IMDb page.")
             print(get_imdb_link(repo))
+        elif command == '10':
+            print("Here are all the series in the list.")
+            list_all_series(repo)
         else:
             print("Unknown command. Check the command list and take another try.")

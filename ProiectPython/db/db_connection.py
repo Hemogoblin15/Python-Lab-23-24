@@ -4,31 +4,28 @@ from db.db_settings import postgresql
 
 class Database:
     """
-    A class which handles the database connection
-
-
+    The class that handles the database connection
     Attributes
-    ----------
+
     connection : Database
-                the database connection itself
+                provides database connection
 
     engine : Engine
-           It is an instance of the Engine class that provides connectivity to the database
+           instance of Engine class, helps the connectivity
 
-    Methods
-    -------
+    Functions
+
     get_instance()
-        Returns the instance of the database class.
+        Returns the specific instance of the database class.
     """
     connection = None
 
     @staticmethod
     def get_instance():
         """
-        Returns the instance of the database class.
-        It is used to preserve the singleton so we don't have multiple instances of the database.
+        Returns a specific instance of the database class.
 
-        :return: an instance of the database class
+        :return: a specific instance of the database class
         """
         if Database.connection is None:
             Database()
@@ -37,10 +34,10 @@ class Database:
     def __init__(self):
         """
         Private constructor. Creates the database connection.
-        All the parameters that are necessary to connect to the database are from the db_settings.py file.
+        The parameters used are provided by the db_settings.py file
         """
         if Database.connection is not None:
-            raise Exception("You are trying to create multiple instances of a singleton")
+            raise Exception("Error! Creating more instances of a singleton is not allowed")
         else:
             Database.connection = self
             url = 'postgresql://{user}:{passwd}@{host}:{port}/{db}'.format(

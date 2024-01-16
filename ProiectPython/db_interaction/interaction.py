@@ -7,52 +7,50 @@ from plyer import notification
 
 class Interaction:
     """
-    A class to represent the database interaction.
+    This class provides a "bridge" between the database and the python code. Its purpose
+        is to make a gateway for solving the queries.
 
-    ...
     Attributes
-    ----------
-    session:
-        database session on which all the queries will take place
 
-    Methods
-    -------
+    session:
+        session object that provides support for the queries directed towards the database
+
+    Functions
+
     insert_series(series):
-        Adds a new tv series to the database.
+        Adds a new TV series to the database.
     delete_series(series_name):
-        Deletes a tv series from the database.
+        Deletes a TV series from the database.
     get_all_series():
-        Returns a list of all the tv series from the database.
-    get_all_usnoozed_series():
-        Returns a list of all the series that are not snoozed from the database.
+        Returns a list of all the series present in the movie list provided by the database
     update_last_watched_episode(series_name, episode, season):
-        Updates the last watched episode for a certain tv series.
+        Updates the last watched episode for a TV series.
     update_last_watched_date(series_name, date):
-        Updates the last watched date for a certain tv series.
+        Updates the last date a TV series was watched.
     update_rating(series_name, rating):
-        Updates the rating for a certain tv series.
+        Updates the user rating for a TV series.
     snooze_series(series_name):
-        Sets the series on snooze.
+        Sets the TV series' snooze flag in the database to true.
     unsnooze_series(series_name):
-        Sets the series on unsnooze.
+        Sets the TV series' snooze flag in the database to false.
     get_last_seen_episode(series_name):
-        Returns the last seen episode for a certain series.
+        Returns the last seen episode for a series.
     is_series_in_db(series_name):
-        Returns a boolean value if the series is in the database or not.
+        Tests whether the series with the specified series name exists in the database
     """
 
     def __init__(self, session):
         """
         Constructor.
         :param session:
-            database session on which all the queries will take place
+            creating a session to interact with the database for the purpose of solving queries
         """
         self.session = session
 
     def insert_series(self, series: Series):
         """
-        Adds a new tv series to the database.
-        :param series: a tv series object that will be added to the database
+        Inserts new TV series to the database.
+        :param series: a TV series object that will be added to the database. basically acts like a setter
         :return: None
         """
         series.link_imdb = find_imdb_link(series.name)
@@ -66,8 +64,8 @@ class Interaction:
 
     def delete_series(self, series_name):
         """
-        Deletes a tv series from the database.
-        :param series_name: the name of the series that is going to be deleted
+        Deletes a TV series from the database.
+        :param series_name: takes the name of the series the user wants to delete from the table
         :return: None
         """
         try:
@@ -82,25 +80,19 @@ class Interaction:
 
     def get_all_series(self):
         """
-        :return: a list of all the series found in the database
+        :return: returns all the series in the database table. getter for every item present in the list
         """
-        series_names = self.session.query(Series).all()
-        names = [series.name for series in series_names]
-        for name in names:
-            print(name)
-
-    def get_all_unsnoozed_series(self):
-        """
-        :return: a list of all the series that are not snoozed
-        """
-        return self.session.query(Series).filter(Series.snoozed == 'False').all()
+        series = self.session.query(Series).all()
+        for show in series:
+            print(f"\n{show.name}, imdb_link: {show.link_imdb}, rating: {show.rating}, "
+                  f"last watched episode: {show.last_watched_episode}, last time watched: {show.last_time_watched}, snoozed: {show.snoozed}")
 
     def update_last_watched_episode(self, series_name, episode, season):
         """
-        Updates the last watched episode for a certain tv series.
-        :param series_name: the name of the tv series that is going to be updated
-        :param episode: the number of the episode
-        :param season: the number of the season
+        Updates the last watched episode for the TV series.
+        :param series_name: name of the TV series whose last_watched episode will be updated
+        :param episode: episode number
+        :param season: season number
         :return: None
         """
         try:
@@ -114,9 +106,9 @@ class Interaction:
 
     def update_last_time_watched(self, series_name, date):
         """
-         Updates the last watched date for a certain tv series.
-        :param series_name: the name of the tv series that is going to be updated
-        :param date: the last watched date
+         Updates the last watched date for a TV series to today's date.
+        :param series_name: name of the TV series whose last_time_watched will be updated
+        :param date: takes today's date
         :return: None
         """
         try:
@@ -130,9 +122,9 @@ class Interaction:
 
     def update_rating(self, series_name, rating):
         """
-        Updates the rating for a certain tv series.
-        :param series_name: the name of the tv series that is going to be updated
-        :param rating: the rating number
+        Updates the rating for a TV series.
+        :param series_name: the name of the TV series whose rating is to be updated
+        :param rating: takes a number of the user's choosing
         :return: None
         """
         try:
@@ -147,7 +139,7 @@ class Interaction:
     def snooze_series(self, series_name):
         """
         Snoozes a series. Sets the snooze flag to TRUE.
-        :param series_name: the name of the tv series that is going to be snoozed
+        :param series_name: the TV series that was chosen to be snoozed
         :return: None
         """
         try:
@@ -162,7 +154,7 @@ class Interaction:
     def unsnooze_series(self, series_name):
         """
         Unsnoozes a series. Sets the snooze flag to FALSE.
-        :param series_name: the name of the tv series that is going to be unsnoozed
+        :param series_name: the TV series that was chosen to be unsnoozed
         :return: None
         """
         try:
@@ -176,8 +168,8 @@ class Interaction:
 
     def get_last_watched_episode(self, series_name):
         """
-        :param series_name: the name of the tv series
-        :return: the last seen episode of the given tv series
+        :param series_name: the name of the TV series
+        :return: returns the last episode of that series the user watched
         """
         series_info = self.session.query(Series).filter(func.lower(Series.name) == series_name.lower()).one()
         if series_info.last_watched_episode is None:
@@ -188,8 +180,8 @@ class Interaction:
 
     def is_series_in_db(self, series_name):
         """
-        :param series_name: the name of the tv series
-        :return: a boolean value if the series is in the database or not
+        :param series_name: the name of the TV series
+        :return: returns whether the series asked for is present in the database. returns a boolean
         """
         return self.session.query(Series).filter(func.lower(Series.name) == series_name.lower()).scalar() is not None
 
