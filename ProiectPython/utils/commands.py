@@ -2,7 +2,7 @@ import os
 from model.series import Series
 from db_interaction.interaction import *
 from datetime import datetime, date
-from utils.youtube_crawler import get_youtube_uploads, convertData
+from utils.youtube_crawler import get_youtube_uploads
 import json
 
 
@@ -163,6 +163,13 @@ def list_all_series(repo):
     """
     return repo.get_all_series()
 
+def format_scraped_data_to_dictionary(titles, video_links):
+    videos = []
+    for title, link in zip(titles, video_links):
+        video_data = {"title": title, "link": link}
+        videos.append(video_data)
+    return videos
+
 
 def json_snooze_notify(repo, driver):
     jsons = [file for file in os.listdir("jsons") if file.endswith('.json')]
@@ -183,17 +190,18 @@ def json_snooze_notify(repo, driver):
             try:
                 with open(json_conversion, 'r') as json_file:
                     data = json.load(json_file)
-                    new_data = convertData(get_youtube_uploads(driver, item.replace("-", " ")))
+                    titles, links = get_youtube_uploads(driver, item.replace("-", " "))
+                    new_data = format_scraped_data_to_dictionary(titles, links)
 
-                    if data != new_data:
+                    if data["videos"] != new_data:
                         notification.notify(
                             title='New uploads!',
                             message='There are new uploads on the episodes you looked up!',
                             app_icon=None,
                             timeout=5,
                         )
-                        for video in new_data["video"]:
-                            if video not in data["video"]:
+                        for video in new_data:
+                            if video not in data["videos"]:
                                 print(f"{video}")
             except FileNotFoundError:
                 print(f"The file '{json_conversion}' was not found.")
