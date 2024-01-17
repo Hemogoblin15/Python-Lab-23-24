@@ -2,7 +2,7 @@ import os
 from model.series import Series
 from db_interaction.interaction import *
 from datetime import datetime, date
-from utils.youtube_crawler import get_youtube_uploads
+from utils.youtube_crawler import get_youtube_uploads, convertData
 import json
 
 
@@ -109,7 +109,7 @@ def update_last_time_watched(repo):
         repo.update_last_time_watched(series_name, date.today())
 
 
-def youtube_links(repo):
+def youtube_links(repo, driver):
     """
     This function provides the titles and links about a specific episode in a series in the database. This function only
     interacts with the database if the specified series is not found in the database, in which case it prompts the user
@@ -131,12 +131,12 @@ def youtube_links(repo):
     if uploads_subject == 'yes':
         last_episode = repo.get_last_watched_episode(series_name)
         search = series_name + " " + last_episode
-        uploads = get_youtube_uploads(search)
+        uploads = get_youtube_uploads(driver, search)
     else:
         season = input(f"Enter the number of the season of {series_name}: ")
         episode = input(f"And the episode number in season {season}: ")
         query = series_name + " " + f"season {season} " + f"episode {episode}"
-        uploads = get_youtube_uploads(query)
+        uploads = get_youtube_uploads(driver, query)
     return uploads
 
 
@@ -164,7 +164,7 @@ def list_all_series(repo):
     return repo.get_all_series()
 
 
-def json_snooze_notify(repo):
+def json_snooze_notify(repo, driver):
     jsons = [file for file in os.listdir("jsons") if file.endswith('.json')]
     snooze_alert_jsons = []
     for files in jsons:
@@ -174,27 +174,33 @@ def json_snooze_notify(repo):
     series_names, last_episodes = repo.get_unsnoozed_series()
     unsnoozed_series = []
     for item1, item2 in zip(series_names, last_episodes):
-        unsnoozed_series.append(f"{item1} " + f"{item2}")
+        unsnoozed_series.append(f"{None if item1 is None else item1.replace(" ", "-")}-" + f"{None if item2 is None else item2.replace(" ", "-")}")
+
 
     for item in snooze_alert_jsons:
         if item in unsnoozed_series:
-            json_conversion = item + '.json'
+            json_conversion = f"./jsons/{item}.json"
             try:
                 with open(json_conversion, 'r') as json_file:
                     data = json.load(json_file)
-                    if data != get_youtube_uploads(json_conversion):
+                    new_data = convertData(get_youtube_uploads(driver, item.replace("-", " ")))
+
+                    if data != new_data:
                         notification.notify(
                             title='New uploads!',
                             message='There are new uploads on the episodes you looked up!',
                             app_icon=None,
                             timeout=5,
                         )
+                        for video in new_data["video"]:
+                            if video not in data["video"]:
+                                print(f"{video}")
             except FileNotFoundError:
                 print(f"The file '{json_conversion}' was not found.")
                 return None
 
 
-def command_picker(repo):
+def command_picker(repo, driver):
     """
     The so-called menu of the application. Asks the user to pick a command to use. For each command, a
     function will be called upon to fulfill the required task.
@@ -241,7 +247,7 @@ def command_picker(repo):
             update_last_time_watched(repo)
         elif command == '8':
             print("You have chosen to see YouTube videos related to an episode.\n")
-            titles, links = (youtube_links(repo))
+            titles, links = (youtube_links(repo, driver))
             print()
             if titles and links:
                 for title, link in zip(titles, links):
