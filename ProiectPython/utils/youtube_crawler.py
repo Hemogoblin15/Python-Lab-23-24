@@ -1,4 +1,5 @@
 import json
+import os.path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -16,12 +17,16 @@ def write_to_json(query, titles, video_links):
     for title, link in zip(titles, video_links):
         video_data = {"title": title, "link": link}
         data["videos"].append(video_data)
-    output_file = f'{query}.json'
+
+    json_directory = 'jsons'
+    if not os.path.exists(json_directory):
+        os.makedirs(json_directory)
+    output_file = os.path.join(json_directory, f'{query}.json')
     with open(output_file, 'w') as json_file:
         json.dump(data, json_file, indent=2)
 
 
-def get_youtube_uploads(query):
+def get_youtube_uploads(query, snoozy=1):
     driver = webdriver.Firefox()
     """
     Crawls YouTube in order to find uploads about a series. Gets the series' name, a season of the series
@@ -33,9 +38,7 @@ def get_youtube_uploads(query):
     try:
         driver.get(f"https://www.youtube.com/results?search_query={query}&sp=CAI%253D")
         # TODO &sp=CAI%253D cod pentru filter by date
-
         driver.implicitly_wait(5)
-
         video_title_hrefs = []
         titles = []
         videos = driver.find_elements(By.ID, "video-title")
@@ -45,8 +48,11 @@ def get_youtube_uploads(query):
                 video_title_hrefs.append(href)
                 titles.append(element.text)
 
-        write_to_json(query, titles, video_title_hrefs)
-        return titles, video_title_hrefs
+        if snoozy == 1:
+            write_to_json(query, titles, video_title_hrefs)
+            return titles, video_title_hrefs
+        else:
+            return titles, video_title_hrefs
 
     finally:
         driver.quit()

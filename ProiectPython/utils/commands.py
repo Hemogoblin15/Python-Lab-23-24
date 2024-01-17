@@ -1,7 +1,9 @@
+import os
 from model.series import Series
 from db_interaction.interaction import *
 from datetime import datetime, date
 from utils.youtube_crawler import get_youtube_uploads
+import json
 
 
 def add_series(repo):
@@ -119,6 +121,7 @@ def youtube_links(repo):
     if not repo.is_series_in_db(series_name):
         series_add = input("The series is not on your list. Would you like to add it? Type yes or no: ")
         if series_add == 'yes':
+
             repo.insert_series(Series(series_name))
         else:
             return
@@ -126,7 +129,7 @@ def youtube_links(repo):
     uploads_subject = input("\nDo you wish to look up videos about the last episode you watched? Type yes or no. ")
     uploads_subject.lower()
     if uploads_subject == 'yes':
-        last_episode = repo.get_last_watched_episode(series_name).split(' ')[-1]
+        last_episode = repo.get_last_watched_episode(series_name)
         search = series_name + " " + last_episode
         uploads = get_youtube_uploads(search)
     else:
@@ -161,6 +164,36 @@ def list_all_series(repo):
     return repo.get_all_series()
 
 
+def json_snooze_notify(repo):
+    jsons = [file for file in os.listdir("jsons") if file.endswith('.json')]
+    snooze_alert_jsons = []
+    for files in jsons:
+        no_extension = os.path.splitext(files)[0]
+        snooze_alert_jsons.append(no_extension)
+
+    series_names, last_episodes = repo.get_unsnoozed_series()
+    unsnoozed_series = []
+    for item1, item2 in zip(series_names, last_episodes):
+        unsnoozed_series.append(f"{item1} " + f"{item2}")
+
+    for item in snooze_alert_jsons:
+        if item in unsnoozed_series:
+            json_conversion = item + '.json'
+            try:
+                with open(json_conversion, 'r') as json_file:
+                    data = json.load(json_file)
+                    if data != get_youtube_uploads(json_conversion):
+                        notification.notify(
+                            title='New uploads!',
+                            message='There are new uploads on the episodes you looked up!',
+                            app_icon=None,
+                            timeout=5,
+                        )
+            except FileNotFoundError:
+                print(f"The file '{json_conversion}' was not found.")
+                return None
+
+
 def command_picker(repo):
     """
     The so-called menu of the application. Asks the user to pick a command to use. For each command, a
@@ -183,7 +216,8 @@ def command_picker(repo):
     command = 0
     while command != '11':
         command = input("\nPick what you would like to do: ")
-
+        if command == '11':
+            break
         if command == '1':
             print("Adding series to the list.")
             add_series(repo)

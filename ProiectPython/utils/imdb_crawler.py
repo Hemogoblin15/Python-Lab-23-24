@@ -13,13 +13,14 @@ def find_imdb_link(series_name):
     ia = IMDb()
     results = ia.search_movie(series_name)
     if results:
-        for movie in results:
-            imdb_link = ia.get_imdbURL(movie)
-            if movie.data['name'].lower().replace(" ", "") == series_name.lower().replace(" ", ""):
+        for series in results:
+            imdb_link = ia.get_imdbURL(series)
+            if series.data['title'].lower().replace(" ", "") == series_name.lower().replace(" ", ""):
+                print(series.data['title-'])
                 return imdb_link
         print("Could not find the series you asked for. Did you mean: ")
-        for index, movie in enumerate(results):
-            print(f"{index + 1}. {movie.data['name']}")
+        for index, series in enumerate(results):
+            print(f"{index + 1}. {series.data['title']}")
 
         print("\nType 0 if none of these apply.")
         choice = input("Choose one of these options: ")
@@ -27,9 +28,3 @@ def find_imdb_link(series_name):
     else:
         return "Could not find the series."
 
-notification.notify(
-    name='testing',
-    message='message',
-    app_icon=None,
-    timeout=10,
-)

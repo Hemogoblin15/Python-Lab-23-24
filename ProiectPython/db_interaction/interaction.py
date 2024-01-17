@@ -22,7 +22,7 @@ class Interaction:
     delete_series(series_name):
         Deletes a TV series from the database.
     get_all_series():
-        Returns a list of all the series present in the movie list provided by the database
+        Returns a list of all the series present in the series list provided by the database
     update_last_watched_episode(series_name, episode, season):
         Updates the last watched episode for a TV series.
     update_last_watched_date(series_name, date):
@@ -50,10 +50,11 @@ class Interaction:
     def insert_series(self, series: Series):
         """
         Inserts new TV series to the database.
-        :param series: a TV series object that will be added to the database. basically acts like a setter
+        :param series: a TV series object that will be added to the database.
         :return: None
         """
         series.link_imdb = find_imdb_link(series.name)
+
         try:
             self.session.add(series)
             self.session.commit()
@@ -80,12 +81,26 @@ class Interaction:
 
     def get_all_series(self):
         """
+        This function has the purpose to print every series found in the database.
         :return: returns all the series in the database table. getter for every item present in the list
         """
         series = self.session.query(Series).all()
         for show in series:
             print(f"\n{show.name}, imdb_link: {show.link_imdb}, rating: {show.rating}, "
                   f"last watched episode: {show.last_watched_episode}, last time watched: {show.last_time_watched}, snoozed: {show.snoozed}")
+
+    def get_unsnoozed_series(self):
+        """
+        This function has the purpose of returning every series in the database with the snoozed flag set to false.
+        :return: returns all the series in the database with the snoozed flag set to false
+        """
+        series = self.session.query(Series).filter(Series.snoozed == False).all()
+        series_names = []
+        last_episodes = []
+        for show in series:
+            series_names.append(show.name)
+            last_episodes.append(show.last_watched_episode)
+        return series_names, last_episodes
 
     def update_last_watched_episode(self, series_name, episode, season):
         """
@@ -190,7 +205,6 @@ class Interaction:
 
         return series_info.link_imdb
 
-
-    # def get_movie_IMDb_ID(self, series_name):
+    # def get_series_IMDb_ID(self, series_name):
     #     series_info = self.session.query(Series).filter(func.lower(Series.name) == series_name.lower()).one()
     #     return series_info.link_imdb[:]
