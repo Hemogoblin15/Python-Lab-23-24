@@ -31,9 +31,9 @@ def try_get_youtube_uploads(driver, query, snoozy=1):
     uploads = ()
     for i in range(0, 10):
         uploads = get_youtube_uploads(driver, query, snoozy=1);
-        if uploads is None:
-            continue
-    return uploads
+        if uploads is not None:
+            return uploads
+    return None
 
 
 def get_youtube_uploads(driver, query, snoozy=1):
@@ -63,8 +63,9 @@ def get_youtube_uploads(driver, query, snoozy=1):
         if snoozy == 1:
             write_to_json(query, titles[:10], video_title_hrefs[:10])
         return titles[:10], video_title_hrefs[:10]
-    except:
+    except Exception as e:
         print("error when scraping")
+        print(e)
         return None
 
     # finally:

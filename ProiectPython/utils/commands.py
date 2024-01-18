@@ -2,7 +2,7 @@ import os
 from model.series import Series
 from db_interaction.interaction import *
 from datetime import datetime, date
-from utils.youtube_crawler import get_youtube_uploads
+from utils.youtube_crawler import get_youtube_uploads, try_get_youtube_uploads
 import json
 
 
@@ -130,12 +130,12 @@ def youtube_links(repo, driver):
     if uploads_subject == 'yes':
         last_episode = repo.get_last_watched_episode(series_name)
         search = series_name + " " + last_episode
-        uploads = get_youtube_uploads(driver, search)
+        uploads = try_get_youtube_uploads(driver, search)
     else:
         season = input(f"Enter the number of the season of {series_name}: ")
         episode = input(f"And the episode number in season {season}: ")
         query = series_name + " " + f"season{season} " + f"episode{episode}"
-        uploads = get_youtube_uploads(driver, query)
+        uploads = try_get_youtube_uploads(driver, query)
     return uploads
 
 
