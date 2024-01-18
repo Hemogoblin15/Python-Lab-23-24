@@ -36,7 +36,7 @@ def try_get_youtube_uploads(driver, query):
     """
     uploads = ()
     for i in range(0, 10):
-        uploads = get_youtube_uploads(driver, query, snoozy=1);
+        uploads = get_youtube_uploads(driver, query, snoozy=1)
         if uploads is not None:
             return uploads
     return None

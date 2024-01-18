@@ -26,4 +26,3 @@ def find_imdb_link(series_name):
         return ia.get_imdbURL(results[int(choice) - 1])
     else:
         return "Could not find the series."
-

@@ -123,7 +123,7 @@ def youtube_links(repo, driver):
     """
     series_name = input("Enter the name of the series you'd like to look up videos about: ")
     if not repo.is_series_in_db(series_name):
-        series_add = input("The series is not on your list. Try to add it first!")
+        print("The series is not on your list. Try to add it first!")
         return None
 
     uploads_subject = input("\nDo you wish to look up videos about the last episode you watched? Type yes or no. ")
