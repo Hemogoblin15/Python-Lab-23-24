@@ -1,15 +1,16 @@
 import os
 from model.series import Series
-from db_interaction.interaction import *
+from db_interaction.repository import *
 from datetime import datetime, date
 from utils.youtube_crawler import get_youtube_uploads, try_get_youtube_uploads
 import json
+from plyer import notification
 
 
 def add_series(repo):
     """
-    This function calls the insert_series function from interaction.py to add a series to the database
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    This function calls the insert_series function from repository.py to add a series to the database
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: None
     """
     series_name = input("Insert the name of the series you want to add to the list: ")
@@ -25,8 +26,8 @@ def add_series(repo):
 
 def remove_series(repo):
     """
-    This function calls the delete_series function from interaction.py to remove a series from the database
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    This function calls the delete_series function from repository.py to remove a series from the database
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: None
     """
     series_name = input("Enter the name of the series you'd wish to delete from the list: ")
@@ -38,8 +39,8 @@ def remove_series(repo):
 
 def modify_series_rating(repo):
     """
-    This function calls the update_rating function from interaction.py to update the rating of a series from the database
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    This function calls the update_rating function from repository.py to update the rating of a series from the database
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: None
     """
 
@@ -55,9 +56,9 @@ def modify_series_rating(repo):
 
 def snooze_series(repo):
     """
-    This function calls the snooze_series function from interaction.py to modify the snooze flag to true
+    This function calls the snooze_series function from repository.py to modify the snooze flag to true
     for a series in the database.
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: None
     """
     series_name = input("Enter the name of the series you'd like to snooze: ")
@@ -69,9 +70,9 @@ def snooze_series(repo):
 
 def unsnooze_series(repo):
     """
-    This function calls the unsnooze_series function from interaction.py to modify the snooze flag to false
+    This function calls the unsnooze_series function from repository.py to modify the snooze flag to false
     for a series in the database.
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: None
     """
     series_name = input("Enter the name of the series you'd like to unsnooze: ")
@@ -83,9 +84,9 @@ def unsnooze_series(repo):
 
 def update_last_watched_episode(repo):
     """
-    This function calls the update_last_watched_episode function from interaction.py to modify the last watched episode
+    This function calls the update_last_watched_episode function from repository.py to modify the last watched episode
     field  for a series in the database.
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: None
     """
     series_name = input("Enter the name of the series you last watched: ")
@@ -99,9 +100,9 @@ def update_last_watched_episode(repo):
 
 def update_last_time_watched(repo):
     """
-    This function calls the update_time_watched function from interaction.py to modify the last time the user watched
+    This function calls the update_time_watched function from repository.py to modify the last time the user watched
     a series in the database.
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: None
     """
     series_name = input("Enter the name of the series you last watched: ")
@@ -115,9 +116,9 @@ def update_last_time_watched(repo):
 def youtube_links(repo, driver):
     """
     This function provides the titles and links about a specific episode in a series in the database. This function only
-    interacts with the database if the specified series is not found in the database, in which case it prompts the user
-    to add it by calling the insert_series from interaction.py.
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    interacts with the database if the specified series is not found within the database.
+    :param driver: the driver used for web scraping, given as a parameter to keep the browser open in the background
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: the titles and links of the YouTube videos about an episode in a series in the database
     """
     series_name = input("Enter the name of the series you'd like to look up videos about: ")
@@ -142,7 +143,7 @@ def youtube_links(repo, driver):
 def get_imdb_link(repo):
     """
     This function provides the IMDb link of a series found in the database.
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: the IMDb link of the series.
     """
     series_name = input("Enter the name of the series you'd like to get the IMDb link to: ")
@@ -156,7 +157,7 @@ def list_all_series(repo):
     """
     This function calls upon the get_all_series function to return all information about the series present in the
     database
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: name, link_imdb, rating, last_episode_watched, last_time_watched, snoozed flag for every series in
     the database
     """
@@ -164,6 +165,12 @@ def list_all_series(repo):
 
 
 def format_scraped_data_to_dictionary(titles, video_links):
+    """
+    Transforms the scraped data from youtube into a dictionary to match the data already in the json file.
+    :param titles: video titles of the scraped videos
+    :param video_links: video links of the scraped videos
+    :return: the scraped data transformed into a dictionary
+    """
     videos = []
     for title, link in zip(titles, video_links):
         video_data = {"title": title, "link": link}
@@ -172,6 +179,14 @@ def format_scraped_data_to_dictionary(titles, video_links):
 
 
 def json_snooze_notify(repo, driver):
+    """
+    Function ran everytime when running the tool. It scrapes youtube for new videos on the episodes stored as jsons. If
+    it finds new videos, a notification gets sent on the OS and the new videos are shown in the tool.
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
+    :param driver: the driver used for web scraping, given as a parameter to keep the browser open in the background
+    :return: sends a notification to the OS and returns the newest videos found on youtube about the episodes of
+    unsnoozed series
+    """
     jsons = [file for file in os.listdir("jsons") if file.endswith('.json')]
     snooze_alert_jsons = []
     for files in jsons:
@@ -214,7 +229,8 @@ def command_picker(repo, driver):
     """
     The so-called menu of the application. Asks the user to pick a command to use. For each command, a
     function will be called upon to fulfill the required task.
-    :param repo: the Interaction instance providing the gateway to the functions that address the database directly.
+    :param driver: the driver used for web scraping, given as a parameter to keep the browser open in the background
+    :param repo: the repository instance providing the gateway to the functions that address the database directly.
     :return: None
     """
     print("Welcome to your watchlist! What would you like to do next?\n"

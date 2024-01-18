@@ -2,10 +2,9 @@ from model.series import Series
 from sqlalchemy import exc, func
 from utils.imdb_crawler import find_imdb_link
 import datetime
-from plyer import notification
 
 
-class Interaction:
+class Repository:
     """
     This class provides a "bridge" between the database and the python code. Its purpose
         is to make a gateway for solving the queries.
@@ -82,8 +81,8 @@ class Interaction:
 
     def get_all_series(self):
         """
-        This function has the purpose to print every series found in the database.
-        :return: returns all the series in the database table. getter for every item present in the list
+        This function has the purpose of printing every series found in the database.
+        :return: returns all the series in the database table. acts like a getter for every item present in the list
         """
         series = self.session.query(Series).all()
         for show in series:
@@ -107,8 +106,8 @@ class Interaction:
         """
         Updates the last watched episode for the TV series.
         :param series_name: name of the TV series whose last_watched episode will be updated
-        :param episode: episode number
-        :param season: season number
+        :param episode: episode number received from the user's input
+        :param season: season number received from the user's input
         :return: None
         """
         try:
@@ -155,7 +154,7 @@ class Interaction:
     def snooze_series(self, series_name):
         """
         Snoozes a series. Sets the snooze flag to TRUE.
-        :param series_name: the TV series that was chosen to be snoozed
+        :param series_name: the TV series chosen to have their snooze flag set to TRUE
         :return: None
         """
         try:
@@ -170,7 +169,7 @@ class Interaction:
     def unsnooze_series(self, series_name):
         """
         Unsnoozes a series. Sets the snooze flag to FALSE.
-        :param series_name: the TV series that was chosen to be unsnoozed
+        :param series_name: the TV series chosen to have their snooze flag set to FALSE
         :return: None
         """
         try:
@@ -185,11 +184,11 @@ class Interaction:
     def get_last_watched_episode(self, series_name):
         """
         :param series_name: the name of the TV series
-        :return: returns the last episode of that series the user watched
+        :return: returns the last episode of a series the user watched
         """
         series_info = self.session.query(Series).filter(func.lower(Series.name) == series_name.lower()).one()
         if series_info.last_watched_episode is None:
-            print ("Looks like you haven't started watching this series yet!")
+            print("Looks like you haven't started watching this series yet!")
             return str(series_info.name)
         else:
             last_watched_episode = str(series_info.last_watched_episode)
@@ -197,12 +196,19 @@ class Interaction:
 
     def is_series_in_db(self, series_name):
         """
+        Checks the database for the series with the name given as a parameter and returns whether it managed to find it
+        or not
         :param series_name: the name of the TV series
-        :return: returns whether the series asked for is present in the database. returns a boolean
+        :return: returns that specifies whether the series asked for is present in the database
         """
         return self.session.query(Series).filter(func.lower(Series.name) == series_name.lower()).scalar() is not None
 
     def get_imdb_link(self, series_name):
+        """
+        Gets the IMDb link associated with a series whose name it gets as a parameter.
+        :param series_name: the name of the TV series
+        :return: returns the imdb link associated to the series' name in the database
+        """
         series_info = self.session.query(Series).filter(func.lower(Series.name) == series_name.lower()).one()
 
         return series_info.link_imdb

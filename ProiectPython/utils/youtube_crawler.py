@@ -27,7 +27,13 @@ def write_to_json(query, titles, video_links):
         json.dump(data, json_file, indent=2)
 
 
-def try_get_youtube_uploads(driver, query, snoozy=1):
+def try_get_youtube_uploads(driver, query):
+    """
+
+    :param driver: the driver used for web scraping, given as a parameter to keep the browser open in the background
+    :param query: series name, season number and episode number
+    :return: returns the first ten youtube videos relevant to the query
+    """
     uploads = ()
     for i in range(0, 10):
         uploads = get_youtube_uploads(driver, query, snoozy=1);
