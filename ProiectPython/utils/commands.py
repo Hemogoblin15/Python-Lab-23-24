@@ -14,7 +14,10 @@ def add_series(repo):
     """
     series_name = input("Insert the name of the series you want to add to the list: ")
     if not repo.is_series_in_db(series_name):
-        repo.insert_series(Series(series_name))
+        season = input("Insert the number of the last season you watched and the episode number.\nSeason: ")
+        episode = input("Episode: ")
+        last_episode = f"season{season} episode{episode}"
+        repo.insert_series(Series(series_name), last_episode)
     else:
         print("Series already present in the list.")
     return None
@@ -119,12 +122,8 @@ def youtube_links(repo, driver):
     """
     series_name = input("Enter the name of the series you'd like to look up videos about: ")
     if not repo.is_series_in_db(series_name):
-        series_add = input("The series is not on your list. Would you like to add it? Type yes or no: ")
-        if series_add == 'yes':
-
-            repo.insert_series(Series(series_name))
-        else:
-            return
+        series_add = input("The series is not on your list. Try to add it first!")
+        return None
 
     uploads_subject = input("\nDo you wish to look up videos about the last episode you watched? Type yes or no. ")
     uploads_subject.lower()
@@ -135,7 +134,7 @@ def youtube_links(repo, driver):
     else:
         season = input(f"Enter the number of the season of {series_name}: ")
         episode = input(f"And the episode number in season {season}: ")
-        query = series_name + " " + f"season {season} " + f"episode {episode}"
+        query = series_name + " " + f"season{season} " + f"episode{episode}"
         uploads = get_youtube_uploads(driver, query)
     return uploads
 
@@ -163,6 +162,7 @@ def list_all_series(repo):
     """
     return repo.get_all_series()
 
+
 def format_scraped_data_to_dictionary(titles, video_links):
     videos = []
     for title, link in zip(titles, video_links):
@@ -181,8 +181,8 @@ def json_snooze_notify(repo, driver):
     series_names, last_episodes = repo.get_unsnoozed_series()
     unsnoozed_series = []
     for item1, item2 in zip(series_names, last_episodes):
-        unsnoozed_series.append(f"{None if item1 is None else item1.replace(" ", "-")}-" + f"{None if item2 is None else item2.replace(" ", "-")}")
-
+        unsnoozed_series.append(
+            f"{None if item1 is None else item1.replace(" ", "-")}-" + f"{None if item2 is None else item2.replace(" ", "-")}")
 
     for item in snooze_alert_jsons:
         if item in unsnoozed_series:
@@ -200,9 +200,11 @@ def json_snooze_notify(repo, driver):
                             app_icon=None,
                             timeout=5,
                         )
+                        print("\nThese are the newest YouTube videos since your last search! Give them a look!")
                         for video in new_data:
                             if video not in data["videos"]:
-                                print(f"{video}")
+                                print(f"{video['title']} {video['link']}")
+                        print()
             except FileNotFoundError:
                 print(f"The file '{json_conversion}' was not found.")
                 return None
@@ -261,7 +263,6 @@ def command_picker(repo, driver):
                 for title, link in zip(titles, links):
                     print(f"Video title: {title}")
                     print(f"Video link: {link}")
-                    print()
         elif command == '9':
             print("Here is the link to this series' IMDb page.")
             print(get_imdb_link(repo))

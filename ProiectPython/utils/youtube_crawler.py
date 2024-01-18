@@ -27,12 +27,23 @@ def write_to_json(query, titles, video_links):
         json.dump(data, json_file, indent=2)
 
 
+def try_get_youtube_uploads(driver, query, snoozy=1):
+    uploads = ()
+    for i in range(0, 10):
+        uploads = get_youtube_uploads(driver, query, snoozy=1);
+        if uploads is None:
+            continue
+    return uploads
+
+
 def get_youtube_uploads(driver, query, snoozy=1):
     # driver = webdriver.Firefox()
     """
     Crawls YouTube in order to find uploads about a series. Gets the series' name, a season of the series
     and an episode of that season as parameter.
-    :param query: The query needed to crawl YouTube. It contains the name of the series, a season number 
+    :param snoozy: flag to see if series is snoozed
+    :param driver: the driver used for the web crawl
+    :param query: The query needed to crawl YouTube. It contains the name of the series, a season number
     and an episode of that season.
     :return: The titles and links of the uploads it managed to find.
     """
@@ -50,22 +61,11 @@ def get_youtube_uploads(driver, query, snoozy=1):
                 titles.append(element.text)
 
         if snoozy == 1:
-            write_to_json(query, titles, video_title_hrefs)
+            write_to_json(query, titles[:10], video_title_hrefs[:10])
         return titles[:10], video_title_hrefs[:10]
+    except:
+        print("error when scraping")
+        return None
 
-    finally:
-        driver.quit()
-
-
-if __name__ == "__main__":
-    search_query = 'fargo The castle clip'
-
-    # titles_list, href_list = get_youtube_uploads(driver, search_query)
-
-    if titles_list and href_list:
-        for title, href in zip(titles_list, href_list):
-            print(f"Video Title: {title}")
-            print(f"Video Href: {href}")
-            print()
-    else:
-        print("No videos found.")
+    # finally:
+    #     driver.quit()

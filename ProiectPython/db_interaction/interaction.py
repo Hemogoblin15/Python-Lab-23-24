@@ -47,14 +47,15 @@ class Interaction:
         """
         self.session = session
 
-    def insert_series(self, series: Series):
+    def insert_series(self, series: Series, last_episode):
         """
         Inserts new TV series to the database.
         :param series: a TV series object that will be added to the database.
+        :param last_episode: prompt the user to insert the last episode they watched.
         :return: None
         """
         series.link_imdb = find_imdb_link(series.name)
-
+        series.last_watched_episode = last_episode
         try:
             self.session.add(series)
             self.session.commit()
@@ -188,7 +189,8 @@ class Interaction:
         """
         series_info = self.session.query(Series).filter(func.lower(Series.name) == series_name.lower()).one()
         if series_info.last_watched_episode is None:
-            return "Looks like you haven't started the series yet!"
+            print ("Looks like you haven't started watching this series yet!")
+            return str(series_info.name)
         else:
             last_watched_episode = str(series_info.last_watched_episode)
             return last_watched_episode

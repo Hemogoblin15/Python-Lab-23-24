@@ -15,3 +15,4 @@ if __name__ == '__main__':
         driver = webdriver.Firefox()
         json_snooze_notify(repo, driver)
         command_picker(repo, driver)
+        driver.quit()

@@ -16,7 +16,6 @@ def find_imdb_link(series_name):
         for series in results:
             imdb_link = ia.get_imdbURL(series)
             if series.data['title'].lower().replace(" ", "") == series_name.lower().replace(" ", ""):
-                print(series.data['title-'])
                 return imdb_link
         print("Could not find the series you asked for. Did you mean: ")
         for index, series in enumerate(results):
