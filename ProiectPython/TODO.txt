@@ -1,2 +1,0 @@
-1. comparatie intre json-uri si noile cautari de fiecare data cand rulezi tool-ul
-2. fac in functie de snooze
